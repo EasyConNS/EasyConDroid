@@ -9,10 +9,14 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
 import com.easycon.easycondroid.device.SwitchReport;
+import com.easycon.easycondroid.device.commandcode.Command;
+import com.easycon.easycondroid.device.commandcode.Reply;
 import com.easycon.easycondroid.device.keys.SwitchButton;
 import com.easycon.easycondroid.device.keys.SwitchHAT;
 import com.easycon.easycondroid.util.Bytes;
@@ -32,6 +36,8 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         setContentView(R.layout.activity_main);
     }
@@ -80,7 +86,7 @@ public class MainActivity extends Activity {
                 Toast.makeText(this, "设置串口参数失败", Toast.LENGTH_LONG).show();
                 return;
             }
-            Toast.makeText(this, "打开端口成功", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "打开端口成功", Toast.LENGTH_SHORT).show();
             connected = true;
             Button btn = findViewById(R.id.connectButton);
             btn.setText("关闭");
@@ -91,10 +97,8 @@ public class MainActivity extends Activity {
 
     public void init() {
         eatVerbose();
-        byte[] send = send(new byte[]{(byte) 0xA5, (byte) 0xA5, (byte) 0x81});
-        if (Arrays.equals(send, new byte[]{(byte) 0x80})) {
-            Toast.makeText(this, "easycon协议沟通成功", Toast.LENGTH_SHORT).show();
-        } else {
+        byte[] send = send(new byte[]{Command.Ready, Command.Ready, Command.Hello});
+        if (!Arrays.equals(send, new byte[]{Reply.Hello})) {
             Toast.makeText(this, "easycon协议沟通失败" + Bytes.prettyPrint(send), Toast.LENGTH_LONG).show();
         }
     }
