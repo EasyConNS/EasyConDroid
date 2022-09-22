@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -64,7 +65,13 @@ public class MainActivity extends Activity {
 
             // Open a connection to the first available driver.
             UsbSerialDriver driver = availableDrivers.get(0);
-            PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent("com.android.example.USB_PERMISSION"), 0);
+            PendingIntent permissionIntent;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent("com.android.example.USB_PERMISSION"), PendingIntent.FLAG_IMMUTABLE);
+            } else {
+                permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent("com.android.example.USB_PERMISSION"), PendingIntent.FLAG_ONE_SHOT);
+            }
+
             manager.requestPermission(driver.getDevice(), permissionIntent);
             UsbDeviceConnection connection = manager.openDevice(driver.getDevice());
             if (connection == null) {
